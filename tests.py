@@ -1,24 +1,65 @@
 from main import BooksCollector
 
-# класс TestBooksCollector объединяет набор тестов, которыми мы покрываем наше приложение BooksCollector
-# обязательно указывать префикс Test
+import pytest
+
+
 class TestBooksCollector:
 
-    # пример теста:
-    # обязательно указывать префикс test_
-    # дальше идет название метода, который тестируем add_new_book_
-    # затем, что тестируем add_two_books - добавление двух книг
-    def test_add_new_book_add_two_books(self):
-        # создаем экземпляр (объект) класса BooksCollector
+    def test_add_new_book_add_one_book(self):
         collector = BooksCollector()
+        collector.add_new_book('Чебурашка')
+        #assert len(list(collector.books_genre.keys())) == 1
+        assert 'Чебурашка' in collector.get_books_genre() and collector.get_book_genre('Чебурашка') == ''
 
-        # добавляем две книги
-        collector.add_new_book('Гордость и предубеждение и зомби')
-        collector.add_new_book('Что делать, если ваш кот хочет вас убить')
+    def test_set_book_genre_set_one_book_genre(self):
+        collector = BooksCollector()
+        collector.add_new_book('Блеск и нищета куртизанок')
+        collector.set_book_genre('Блеск и нищета куртизанок', 'Мультфильмы')
+        assert collector.get_books_with_specific_genre('Мультфильмы')[0] == 'Блеск и нищета куртизанок'
 
-        # проверяем, что добавилось именно две
-        # словарь books_rating, который нам возвращает метод get_books_rating, имеет длину 2
-        assert len(collector.get_books_rating()) == 2
+    def test_get_books_genre_one_book_added(self):
+        collector = BooksCollector()
+        collector.add_new_book('Пиноккио')
+        collector.set_book_genre('Пиноккио', 'Мультфильмы')
+        assert collector.get_book_genre('Пиноккио') == 'Мультфильмы'
 
-    # напиши свои тесты ниже
-    # чтобы тесты были независимыми в каждом из них создавай отдельный экземпляр класса BooksCollector()
+    def test_get_books_with_specific_genre_zero_added_books(self):
+        collector = BooksCollector()
+        assert len(collector.get_books_with_specific_genre('Детективы')) == 0
+
+    def test_get_books_genre_one_book_and_genre_added(self):
+        collector = BooksCollector()
+        collector.add_new_book('Бусинка')
+        collector.set_book_genre('Бусинка', 'Детектив')
+        assert 'Бусинка', 'Детектив' in collector.get_books_genre()
+
+
+    def test_get_books_for_children_no_books_added(self):
+        collector = BooksCollector()
+        collector.add_new_book('Golf')
+        collector.set_book_genre('Golf', 'Ужасы')
+        assert len(collector.get_books_for_children()) == 0
+
+    @pytest.mark.parametrize('name', ['Гений и злодейство', 'Варшава', 'Михаил Григорьевич'])
+    def test_add_book_in_favorites_one_book_added(self, name):
+        collector = BooksCollector()
+        collector.add_new_book(name)
+        collector.add_book_in_favorites(name)
+        assert collector.get_list_of_favorites_books()[0] == name
+
+    def test_delete_book_from_favorites_one_book_deleted(self):
+        collector = BooksCollector()
+        collector.add_new_book('Доктор Живаго')
+        collector.add_book_in_favorites('Доктор Живаго')
+        collector.add_new_book('Доктор')
+        collector.add_book_in_favorites('Доктор')
+        collector.delete_book_from_favorites('Доктор')
+        assert 'Доктор' not in collector.get_list_of_favorites_books()
+
+    def test_get_list_of_favorites_books_two_books_added(self):
+        collector = BooksCollector()
+        collector.add_new_book('Красная шапочка')
+        collector.add_book_in_favorites('Красная шапочка')
+        collector.add_new_book('Весна')
+        collector.add_book_in_favorites('Весна')
+        assert len(collector.get_list_of_favorites_books()) == 2
